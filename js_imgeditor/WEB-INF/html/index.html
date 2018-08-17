@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/main.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            init();
+        });
+    </script>
+    <style type="text/css">
+        div.image_view {
+           border: 1px solid; z-index: 100;
+        }
+        .close {
+            display: none;
+        }
+        .crop_box {
+            position: absolute; border: 1px solid; opacity: 0.5; background-color: gray; top: 10px; left: 10px; z-index: 105; width: 300px; height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="image_view">
+        <!-- Image Preview canvas -->
+        <canvas id="canvas"></canvas>
+        <!-- This box open at using Tool -->
+        <div class="tools close" id="toolBox"></div>
+    </div>
+
+    <input type="file" name="fileUpload" id="fileUpload" />
+
+    <div class="toolkit">
+        <button type="button" name="crop" class="crop" id="crop_open" onclick="">잘라내기</button>
+
+    </div>
+
+
+</body>
+</html>
