@@ -20,6 +20,13 @@ var manageState = function(eventName) {
     }
 }
 
+IMAGE_EDITOR.pos = {
+    __pos1 : 0,
+    __pos2 : 0,
+    __pos3 : 0,
+    __pos4 : 0
+}
+
 IMAGE_EDITOR.events = {
     crop : {
         open : function() {
@@ -30,11 +37,38 @@ IMAGE_EDITOR.events = {
                 $("#toolBox").addClass('crop_box');
                 toggleBox('toolBox', 'open');
                 manageState("crop");
+                $("#toolBox").on("mousedown", this.move);
             }
         },
-        move : function() {
-            
+        move : function(e) {
+            if(e.type === "mousedown") {
+                var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+                e = e || widnow.event;
+                e.preventDefault();
+                // get the mouse cursor position at startup:
+                IMAGE_EDITOR.pos.__pos3 = e.clientX;
+                IMAGE_EDITOR.pos.__pos4 = e.clientY;
+
+                $(IMAGE_EDITOR.object.getObject()).on("mousemove", function(e) {
+                    e = e || window.event;
+                    e.preventDefault();
+                    this.pos1 = this.pos3 - e.clientX;
+                    this.pos2 = this.pos4 - e.clientY;
+                    this.pos3 = e.clientX;
+                    this.pos4 = e.clientY;
+
+                    console.log("pos1 : "+pos1+" pos2 : "+pos2+" pos3 : "+pos3+" pos4 : "+pos4);
+    
+                    $(".crop_box").attr("style", "top : "+$(".crop_box")[0].offsetTop - this.pos2+"px; left : "+$(".crop_box")[0].offsetLeft - this.pos1+"px;");
+                });
+
+                $("#toolBox").on("mouseup", function() {
+                    $(IMAGE_EDITOR.object.getObject()).off("onmousemove");
+                    document.getElementById("toolBox").onmouseup = null;
+                });
+            }
         },
+
         cut : function() {
 
         },
@@ -48,7 +82,13 @@ IMAGE_EDITOR.events = {
         // Image check
         if (file.type.match('image.*')) {
             // call function to draw canvas
-            IMAGE_EDITOR.events.__fileUpload(file, 1000);
+            try {
+                IMAGE_EDITOR.events.__fileUpload(file, IMAGE_EDITOR.object.getWidth());
+            } catch (err) {
+                alert("Error : Undefined Canvas tag \n Solution : Check definition canvas tag on your html");
+                return;
+            }
+            
         } else {
             alert("That file wasn't an image.");
         }
@@ -94,7 +134,28 @@ IMAGE_EDITOR.state = {
     }
 };
 
-var init = function() {
+IMAGE_EDITOR.object = {
+    __object : "",
+    setObject : function(elementId) {
+        this.__object = document.getElementById(elementId) === undefined ? document.getElementsByTagName('canvas')[0] : document.getElementById(elementId);
+    },
+
+    getObject : function() {
+        return this.__object;
+    },
+
+    getWidth : function() {
+        return this.__object.getAttribute("width") === undefined || this.__object.getAttribute("width") < 200 ? 500 : this.__object.getAttribute("width");
+    },
+
+    getHeight : function() {
+        return this.__object.getAttribute("height") === undefined ? 500 : this.__object.getAttribute("height");
+    }
+}
+
+var init = function(elementId) {
+    IMAGE_EDITOR.object.setObject(elementId);
+
     $("#fileUpload").on("change", function(event) {
         IMAGE_EDITOR.events.handleDrop(event.target.files)
     });

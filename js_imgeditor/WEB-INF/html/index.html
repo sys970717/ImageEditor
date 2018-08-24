@@ -9,19 +9,15 @@
     <script type="text/javascript" src="../../js/main.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
-            init();
+            init('canvas');
         });
     </script>
     <style type="text/css">
-        div.image_view {
-           border: 1px solid; z-index: 100;
-        }
-        .close {
-            display: none;
-        }
-        .crop_box {
-            position: absolute; border: 1px solid; opacity: 0.5; background-color: gray; top: 10px; left: 10px; z-index: 105; width: 300px; height: 300px;
-        }
+        div.image_view { border: 1px solid; z-index: 100; position: relative; }
+        #canvas { display: block; position: relative; }
+        .close { display: none; }
+        .toolkit { position: relative; display: block; z-index: 9999; padding: 20px 10px; }
+        .crop_box { position: absolute; display: block; border: 1px solid; opacity: 0.5; background-color: gray; top: 10px; left: 10px; z-index: 105; width: 100px; height: 100px; }
     </style>
 </head>
 <body>
