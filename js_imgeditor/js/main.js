@@ -20,10 +20,6 @@ var manageState = function(eventName) {
     }
 }
 
-IMAGE_EDITOR.pos = {
-   be_x : 0, be_y : 0, af_x : 0, af_y : 0
-}
-
 IMAGE_EDITOR.events = {
     crop : {
         open : function() {
@@ -42,23 +38,29 @@ IMAGE_EDITOR.events = {
             e.preventDefault();
            
             if(e.type === "mousedown") {
-                $(IMAGE_EDITOR.object.getObject()).on("mousemove", function(e) {
+                $(IMAGE_EDITOR.object.getBoxObj()).on("mousemove", function(e) {
                     e = window.event;
                     e.preventDefault();
-                    IMAGE_EDITOR.pos.be_x = IMAGE_EDITOR.pos.af_x - e.clientX;
-                    IMAGE_EDITOR.pos.be_y = IMAGE_EDITOR.pos.af_y - e.clientY;
-                    IMAGE_EDITOR.pos.af_x = e.clientX;
-                    IMAGE_EDITOR.pos.af_y = e.clientY;
+                    if(e.clientX < $(IMAGE_EDITOR.object.getBoxObj()).offset().left) {
 
-                    console.log("clientX: "+e.clientX+" X : "+IMAGE_EDITOR.pos.be_x);
-    
-                    $(".crop_box").attr("style", "top : "+($(".crop_box")[0].offsetTop - IMAGE_EDITOR.pos.be_y)+"px; left : "+($(".crop_box")[0].offsetLeft - IMAGE_EDITOR.pos.be_x)+"px;");
+                    } else if(e.clientX > $(IMAGE_EDITOR.object.getBoxObj()).prop('width')) {
+
+                    } else if(e.clientY < $(IMAGE_EDITOR.object.getBoxObj()).offset().top) {
+
+                    } else if(e.clientY > $(IMAGE_EDITOR.object.getBoxObj()).prop('height')) {
+                        
+                    }
+
+                    console.log("CLIENT : " +e.clientX + " \t "+e.clientY);
+                    console.log("PAGE : " +e.pageX + " \t "+e.pageY);
+
+                    $(".crop_box").attr("style", "top : "+(e.pageY)+"px; left : "+(e.pageX)+"px;");
                 });
 
                 $(document).on("mouseup", function() {
                     document.getElementById("toolBox").onmouseup = null;
                     // all event stop
-                    $(IMAGE_EDITOR.object.getObject()).off("mousemove", this.move);
+                    $(IMAGE_EDITOR.object.getBoxObj()).off("mousemove", this.move);
                 });
             }
         },
@@ -103,6 +105,14 @@ IMAGE_EDITOR.events = {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 canvas.width = image.width;
                 canvas.height = image.height;
+
+                $("#div_view").css({
+                    width : canvas.width+'px',
+                    height : canvas.height+'px',
+                    top : canvas.offsetTop+'px',
+                    left : canvas.offsetLeft+'px'
+                });
+
                 ctx.drawImage(image, 0, 0, image.width, image.height);
             };
             image.src = this.result;
@@ -144,6 +154,10 @@ IMAGE_EDITOR.object = {
 
     getHeight : function() {
         return this.__object.getAttribute("height") === undefined ? 500 : this.__object.getAttribute("height");
+    },
+
+    getBoxObj : function() {
+        return document.getElementById('div_view');
     }
 }
 

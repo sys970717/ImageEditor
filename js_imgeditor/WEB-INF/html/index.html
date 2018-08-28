@@ -14,7 +14,8 @@
     </script>
     <style type="text/css">
         div.image_view { border: 1px solid; z-index: 100; position: relative; }
-        #canvas { display: block; position: relative; }
+        #canvas { display: block; position: relative; z-index: 101}
+        #div_view { position: absolute; z-index : 104; opacity : 1}
         .close { display: none; }
         .toolkit { position: relative; display: block; z-index: 9999; padding: 20px 10px; }
         .crop_box { position: absolute; display: block; border: 1px solid; cursor: move; opacity: 0.5; background-color: gray; top: 10px; left: 10px; z-index: 105; width: 100px; height: 100px; }
@@ -25,6 +26,7 @@
         <!-- Image Preview canvas -->
         <canvas id="canvas"></canvas>
         <!-- This box open at using Tool -->
+        <div class="div_view_box" id="div_view"></div>
         <div class="tools close" id="toolBox"></div>
     </div>
 
