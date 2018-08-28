@@ -21,10 +21,7 @@ var manageState = function(eventName) {
 }
 
 IMAGE_EDITOR.pos = {
-    __pos1 : 0,
-    __pos2 : 0,
-    __pos3 : 0,
-    __pos4 : 0
+   be_x : 0, be_y : 0, af_x : 0, af_y : 0
 }
 
 IMAGE_EDITOR.events = {
@@ -37,34 +34,31 @@ IMAGE_EDITOR.events = {
                 $("#toolBox").addClass('crop_box');
                 toggleBox('toolBox', 'open');
                 manageState("crop");
-                $("#toolBox").on("mousedown", this.move);
+                document.getElementById('toolBox').onmousedown = this.move;
             }
         },
         move : function(e) {
+            e = e || widnow.event;
+            e.preventDefault();
+           
             if(e.type === "mousedown") {
-                var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-                e = e || widnow.event;
-                e.preventDefault();
-                // get the mouse cursor position at startup:
-                IMAGE_EDITOR.pos.__pos3 = e.clientX;
-                IMAGE_EDITOR.pos.__pos4 = e.clientY;
-
                 $(IMAGE_EDITOR.object.getObject()).on("mousemove", function(e) {
-                    e = e || window.event;
+                    e = window.event;
                     e.preventDefault();
-                    this.pos1 = this.pos3 - e.clientX;
-                    this.pos2 = this.pos4 - e.clientY;
-                    this.pos3 = e.clientX;
-                    this.pos4 = e.clientY;
+                    IMAGE_EDITOR.pos.be_x = IMAGE_EDITOR.pos.af_x - e.clientX;
+                    IMAGE_EDITOR.pos.be_y = IMAGE_EDITOR.pos.af_y - e.clientY;
+                    IMAGE_EDITOR.pos.af_x = e.clientX;
+                    IMAGE_EDITOR.pos.af_y = e.clientY;
 
-                    console.log("pos1 : "+pos1+" pos2 : "+pos2+" pos3 : "+pos3+" pos4 : "+pos4);
+                    console.log("clientX: "+e.clientX+" X : "+IMAGE_EDITOR.pos.be_x);
     
-                    $(".crop_box").attr("style", "top : "+$(".crop_box")[0].offsetTop - this.pos2+"px; left : "+$(".crop_box")[0].offsetLeft - this.pos1+"px;");
+                    $(".crop_box").attr("style", "top : "+($(".crop_box")[0].offsetTop - IMAGE_EDITOR.pos.be_y)+"px; left : "+($(".crop_box")[0].offsetLeft - IMAGE_EDITOR.pos.be_x)+"px;");
                 });
 
-                $("#toolBox").on("mouseup", function() {
-                    $(IMAGE_EDITOR.object.getObject()).off("onmousemove");
+                $(document).on("mouseup", function() {
                     document.getElementById("toolBox").onmouseup = null;
+                    // all event stop
+                    $(IMAGE_EDITOR.object.getObject()).off("mousemove", this.move);
                 });
             }
         },
