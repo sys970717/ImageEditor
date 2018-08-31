@@ -29,10 +29,34 @@ var elementDrag = function(e) {
     mouseX = e.clientX;
     mouseY = e.clientY;
 
-    $("#toolBox.crop_box").css({
-        // if using offset, don't behavior you wants
-        top: ($("#toolBox.crop_box").position().top-posY),
-        left: ($("#toolBox.crop_box").position().left-posX)
+    // Move position Data
+    var moveX = 0, moveY = 0;
+    // container position data
+    var container = IMAGE_EDITOR.object;
+    var containerX = IMAGE_EDITOR.object.getObject().offsetLeft;
+    var containerY = IMAGE_EDITOR.object.getObject().offsetTop;
+
+    // crop box control div in container;
+    // if using jquery offset, don't behavior you wants
+    if(containerX >= $("#toolBox_crop.crop_box").position().left-posX) {
+        moveX = containerX;
+    } else if(container.getWidth() <= ( ($("#toolBox_crop.crop_box").position().left-posX) + $("#toolBox_crop.crop_box").width()) ) {
+        moveX = container.getWidth()
+    } else {
+        moveX =  $("#toolBox_crop.crop_box").position().left-posX;
+    }
+
+    if(containerY >= $("#toolBox_crop.crop_box").position().top-posY) {
+        moveY = containerY;
+    } else if(container.getHeight() <= ( ($("#toolBox_crop.crop_box").position().top-posY) + $("#toolBox_crop.crop_box").height()) ) {
+        moveY = container.getHeight();
+    } else {
+        moveY = $("#toolBox_crop.crop_box").position().top-posY;
+    }
+
+    $("#toolBox_crop.crop_box").css({
+        top: moveY,
+        left: moveX
     });
 }
 
@@ -43,12 +67,11 @@ IMAGE_EDITOR.events = {
                 alert("잘라내기 기능을 사용중입니다.");
                 return;
             } else {
-                $("#toolBox").addClass('crop_box');
-                $("#toolBox").resizable();
-                toggleBox('toolBox', 'open');
+                $("#toolBox_crop").addClass('crop_box');
+                toggleBox('toolBox_crop', 'open');
                 manageState("crop");
                 
-                $("#toolBox").on("mousedown", function() {
+                $("#toolBox_crop").on("mousedown", function() {
                     toggleBox('div_view', 'open');
                     mouseX = event.clientX;
                     mouseY = event.clientY;
@@ -56,19 +79,38 @@ IMAGE_EDITOR.events = {
                     $(IMAGE_EDITOR.object.getBoxObj()).on("mousemove", elementDrag);
                 });
 
+                $("#toolBox_crop").on("dblclick", IMAGE_EDITOR.events.crop.cut);
+
                 $(document).on("mouseup", function () {
                     toggleBox('div_view', 'close');
-                    $("#toolBox").off("mouseup", this);
-                    document.getElementById("toolBox").onmouseup = null;
+                    $("#toolBox_crop").off("mouseup", this);
+                    document.getElementById("toolBox_crop").onmouseup = null;
                     // all event stop
                     $(IMAGE_EDITOR.object.getBoxObj()).off("mousemove", elementDrag);
                 });
             }
         },
 
-        cut: function () {
+        cut: function (e) {
+            var cropBox = $("#toolBox_crop");
+            var canvas = IMAGE_EDITOR.object.getObject();
+            var ctx = canvas.getContext('2d');
 
+            var imageData = canvas.toDataURL();
+            var image = new Image();
+            image.src = imageData;
+
+            image.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                var srcX = parseInt(cropBox.position().left),
+                srcY = parseInt(cropBox.position().top),
+                srcWidth = parseInt(cropBox.width()),
+                srcHeight = parseInt(cropBox.height());
+
+                ctx.drawImage(image, srcX, srcY, srcWidth, srcHeight);
+            }
         },
+        
         cancel: function () {
 
         }
@@ -113,34 +155,56 @@ IMAGE_EDITOR.events = {
                     top: canvas.offsetTop + 'px',
                     left: canvas.offsetLeft + 'px'
                 });
-
+                $("#crop_preview").css({ width: image.width, height: image.height});
                 ctx.drawImage(image, 0, 0, image.width, image.height);
             };
             image.src = this.result;
+            IMAGE_EDITOR.object.setOriginal(this.result);
         }
         fileReader.readAsDataURL(file);
+        IMAGE_EDITOR.state.setStateLog("upload");
     }
 };
 
 // 에디터 기능 상태관리 ( 다른 툴을 이용하여 편집 중 충돌이 생기지 않도록 한다. )
 IMAGE_EDITOR.state = {
     condition: false,
+    __canvasLog : [],
     stateLog: [],
     setStateLog: function (eventName) {
         if (this.stateLog.length >= 20) {
-            //TODO : 배열 한칸씩 오른쪽으로 밀기
-        } else {
-            //TODO : History 담기
-            this.stateLog.push(eventName);
+            this.stateLog.splice(0,1);
         }
+
+        //TODO : History 담기
+        this.stateLog.push(eventName);
     },
     getStateLog: function () {
-        return this.stateLog.Array.prototype.slice(0);
+        return this.stateLog.Array.prototype.slice(0,1);
+    },
+
+    setCanvasLog : function(data) {
+        if (this.__canvasLog.length >= 20) {
+             this.stateLog.splice(0,1);
+        }
+        //TODO : History 담기
+        this.__canvasLog.push(data);
+    },
+
+    getCanvasLog : function() {
+        var canvasLog = this.__canvasLog.length;
+        var returnData = this.__canvasLog.Array.prototype.slice(canvasLog-1, canvasLog);
+        returnData.splice(canvasLog-1, 1);
+        return this.returnData;
     }
 };
 
+/*
+ * 에디터 object관리
+ */
 IMAGE_EDITOR.object = {
     __object: "",
+    __origin : {},
     setObject: function (elementId) {
         this.__object = document.getElementById(elementId) === undefined ? document.getElementsByTagName('canvas')[0] : document.getElementById(elementId);
     },
@@ -159,6 +223,14 @@ IMAGE_EDITOR.object = {
 
     getBoxObj: function () {
         return document.getElementById('div_view');
+    },
+
+    setOriginal : function(data) {
+        this.__origin = data;
+    }, 
+
+    getOriginal : function() {
+        return this.__origin;
     }
 }
 
