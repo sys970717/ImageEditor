@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../../js/default.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            init('canvas');
+        });
+    </script>
+    <style type="text/css">
+        div.image_view { border: 1px solid; position: relative; width: 600px; height: 700px;}
+        #canvas { display: block; position: relative; }
+        #div_view { position: absolute;}
+        .div_view_box { position: absolute; z-index : 110; opacity : 0; background-color: #000;}
+        .close { display: none; }
+        .toolkit { position: relative; display: block; z-index: 9999; padding: 20px 10px; }
+
+        /* Crop Box */
+        #wrapBox { position: absolute; cursor: move; opacity: 0.5; top: 10px; left: 10px; }
+        #overlay { opacity : 0; }
+        .cropbox { display: block; opacity: 0.5; position: absolute; width: 100%; height: 100%; }
+        .resize-handle-se { width: 10px; height: 10px; position: absolute; display: inline-block; bottom: 5px; right: 5px; cursor: se-resize; z-index: 999; background-color: #eee; border-radius: 10px; border: 1px solid black; }
+    </style>
+</head>
+<body>
+    <div class="image_view" id="image_view">
+        <!-- Image Preview canvas -->
+        <canvas id="canvas"></canvas>
+        <!-- This box open at using Tool -->
+        
+    </div>
+
+    <input type="file" name="fileUpload" id="fileUpload" />
+
+    <div class="toolkit">
+        <button type="button" name="crop" class="crop" id="crop_open" onclick="">잘라내기</button>
+
+    </div>
+
+
+</body>
+</html>

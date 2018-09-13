@@ -7,60 +7,33 @@
     <title>Document</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="../../js/main.js"></script>
+    <script type="text/javascript" src="../../js/default.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
             init('canvas');
         });
     </script>
     <style type="text/css">
-        div.image_view { border: 1px solid; z-index: 100; position: relative; }
-        #canvas { display: block; position: relative; z-index: 101}
-        #div_view { position: absolute; z-index : 110; opacity : 0.5; background-color: #000;}
+        div.image_view { border: 1px solid; position: relative; width: 600px; height: 700px;}
+        #canvas { display: block; position: relative; }
+        #div_view { position: absolute;}
+        .div_view_box { position: absolute; z-index : 110; opacity : 0; background-color: #000;}
         .close { display: none; }
         .toolkit { position: relative; display: block; z-index: 9999; padding: 20px 10px; }
 
         /* Crop Box */
-        #toolBox_crop { position: absolute; cursor: move; opacity: 0.5; top: 10px; left: 10px; z-index: 105; width: 100px; height: 100px; }
+        #wrapBox { position: absolute; cursor: move; opacity: 0.5; top: 10px; left: 10px; }
+        #overlay { opacity : 0; }
         .cropbox { display: block; opacity: 0.5; position: absolute; width: 100%; height: 100%; }
-        .cropbox_line { background-color: #39f; }
-        .cropbox.line-e { cursor : ew-resize; width: 5px; right: -3px; top: 0; }
-        .cropbox.line-n { cursor : ns-resize; height: 5px; right: 0px; top: -3px; }
-        .cropbox.line-w { cursor : ew-resize; width: 5px; left: -3px; top: 0; }
-        .cropbox.line-s { cursor : ns-resize; height: 5px; left: 0px; bottom: -3px; }
-
-        .crpo_pointer { height: 5px; opacity: 0.75; width: 5px; background-color: #39f;}
-        .cropbox.pointer-e { cursor : ew-resize; right: -3px; top: 50%; margin-top: -3px }
-        .cropbox.pointer-n { cursor : ns-resize; left: 50%; top: -3px; margin-left: -3px; }
-        .cropbox.pointer-w { cursor : ew-resize; left: -3px; margin-top: -3px; top: 50%}
-        .cropbox.pointer-s { cursor : ns-resize; left: 50%; bottom: -3px; margin-left: -3px; }
-
-        .cropbox.pointer-ne { cursor : nesw-resize; right: -3px; top: -3px }
-        .cropbox.pointer-nw { cursor : nwse-resize; left: -3px; top: -3px; }
-        .cropbox.pointer-sw { cursor : nesw-resize; left: -3px; bottom: -3px; }
-        .cropbox.pointer-se { cursor : nwse-resize; right: -3px; bottom: -3px; }
+        .resize-handle-se { width: 10px; height: 10px; position: absolute; display: inline-block; bottom: 5px; right: 5px; cursor: se-resize; z-index: 999; background-color: #eee; border-radius: 10px; border: 1px solid black; }
     </style>
 </head>
 <body>
-    <div class="image_view">
+    <div class="image_view" id="image_view">
         <!-- Image Preview canvas -->
         <canvas id="canvas"></canvas>
         <!-- This box open at using Tool -->
-        <div class="div_view_box close" id="div_view"></div>
-        <div class="tools close" id="toolBox_crop">
-            <span class="cropbox cropbox_line line-e"></span>
-            <span class="cropbox cropbox_line line-n"></span>
-            <span class="cropbox cropbox_line line-w"></span>
-            <span class="cropbox cropbox_line line-s"></span>
-            <span class="cropbox crpo_pointer pointer-e"></span>
-            <span class="cropbox crpo_pointer pointer-n"></span>
-            <span class="cropbox crpo_pointer pointer-w"></span>
-            <span class="cropbox crpo_pointer pointer-s"></span>
-            <span class="cropbox crpo_pointer pointer-ne"></span>
-            <span class="cropbox crpo_pointer pointer-nw"></span>
-            <span class="cropbox crpo_pointer pointer-sw"></span>
-            <span class="cropbox crpo_pointer pointer-se"></span>
-        </div>
+        
     </div>
 
     <input type="file" name="fileUpload" id="fileUpload" />
