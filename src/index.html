@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="text/javascript" src="./index.js"></script>
+    <script type="text/javascript" src="./util.js"></script>
+    <script type="text/javascript" src="./jquery-3.1.1.min.js"></script>
+    <style>
+        .off { display:none; }
+        .crop { border: 2px solid #eee; }
+        .wrap_box { position: absolute; cursor: move;}
+        .resize-handle-se {width: 10px;height: 10px;position: absolute;display: inline-block;bottom: 5px;right: 5px;cursor: se-resize;z-index: 999;background-color: #eee;border-radius: 10px;border: 1px solid black;}
+        .sticker-container {position: absolute;top: 0;left: 0;width: 100%;height: 100%; overflow: hidden;}
+        .sticker_image{position: absolute;display: inline-block;}
+        .image_stickers{cursor: move;position: relative;width: 100px;height: 100px;}
+    </style>
+</head>
+<body>
+    <input type="file" name="fileUpload" id="fileUpload"/>
+    <fieldset>
+        <legend>ToolList</legend>
+        <button onclick="handleCropButton()">잘라내기</button>
+        <button onclick="handleRotate('left')">왼쪽</button>
+        <button onclick="handleRotate('right')">오른쪽</button>
+        <button onclick="handleSticker.create(this)"><img src="./sticker/01.png" width="30"/></button>
+        <button onclick="handleImageFlip('vertical')">수직반전</button>
+        <button onclick="handleImageFlip('horizontal')">수평반전</button>
+    </fieldset>
+    <div id="wrapper">
+        <canvas width="500" height="500" id="editor"></canvas>
+        
+        <div id="crop_wrapper" class="crop wrap_box off">
+            <div id="overlay" style="width:100px; height:100px;" onmousedown="handleMoveCropBox(event);"></div>
+            <div id="resizeOverlay" class="resize-handle-se" onmousedown="handleResizeCropBox(event)"></div>
+        </div>
+    </div>
+    
+
+
+    <script type="text/javascript">
+        window.onload = init()
+    </script>
+</body>
+</html>
