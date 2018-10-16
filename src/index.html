@@ -7,8 +7,10 @@
     <title>Document</title>
     <script type="text/javascript" src="./index.js"></script>
     <script type="text/javascript" src="./util.js"></script>
+    <script type="text/javascript" src="./filter_custom.js"></script>
     <script type="text/javascript" src="./jquery-3.1.1.min.js"></script>
     <style>
+        #wrapper { width: 500px; height: 500px; }
         .off { display:none; }
         .crop { border: 2px solid #eee; }
         .wrap_box { position: absolute; cursor: move;}
@@ -23,11 +25,21 @@
     <fieldset>
         <legend>ToolList</legend>
         <button onclick="handleCropButton()">잘라내기</button>
+        <button onclick="drawCrop()">잘라내기 서브밋 </button>
         <button onclick="handleRotate('left')">왼쪽</button>
         <button onclick="handleRotate('right')">오른쪽</button>
         <button onclick="handleSticker.create(this)"><img src="./sticker/01.png" width="30"/></button>
         <button onclick="handleImageFlip('vertical')">수직반전</button>
         <button onclick="handleImageFlip('horizontal')">수평반전</button>
+        <button onclick="handleSticker.render()">현재상태 저장</button>
+        <button onclick="handleZoom.in()">Zoom in</button>
+        <button onclick="handleZoom.out()">Zoom out</button>
+        
+    </fieldset>
+    <fieldset>
+        <legend>Filter</legend>
+        <button onclick="handleFilter(this.dataset.filter)" data-filter="restore">원래대로</button>
+        <button onclick="handleFilter(this.dataset.filter)" data-filter="grayscale">GrayScale</button>
     </fieldset>
     <div id="wrapper">
         <canvas width="500" height="500" id="editor"></canvas>
@@ -35,6 +47,10 @@
         <div id="crop_wrapper" class="crop wrap_box off">
             <div id="overlay" style="width:100px; height:100px;" onmousedown="handleMoveCropBox(event);"></div>
             <div id="resizeOverlay" class="resize-handle-se" onmousedown="handleResizeCropBox(event)"></div>
+        </div>
+
+        <div id="img_tmp">
+            <img id="tmp_image" width="500" height="500">
         </div>
     </div>
     

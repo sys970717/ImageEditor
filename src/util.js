@@ -33,7 +33,7 @@ var getScaleSize = function (width, height) {
 }
 
 // JQuery Object 를 넘긴다.
-var _checkedMovePosition = function (obj, e) {
+var _checkedMovePosition = function (target, parent, e) {
     var containerY = canvas.offsetTop, containerX = canvas.offsetLeft
     var width = state.image_width
     var height = state.image_height
@@ -42,23 +42,26 @@ var _checkedMovePosition = function (obj, e) {
     mouse.mouseX = e.pageX, mouse.mouseY = e.pageY
     var r_top = 0, r_left = 0
 
-    // if (containerX >= obj.position().left - pos_x) {
-    //     r_left = containerX
-    // } else if (width <= ((obj.position().left - pos_x) + obj.width()) ) {
-    //     r_left = (containerX + state.image_width) - obj.width()
-    // } else {
-        r_left = obj.position().left - pos_x
-    // }
+    console.log('Y : '+Math.round(((parent.position().top - pos_y)) + target.height()))
+    console.log('Y : '+Math.round ((containerY+height) - target.height()))
 
-    // if (containerY >= obj.position().top - pos_y) {
-    //     r_top = containerY
-    // } else if ( height <= ((obj.position().top - pos_y) + obj.height()) ) {
-    //     r_top = (containerY + state.image_height) - obj.height()
-    // } else {
-        r_top = obj.position().top - pos_y
-    // }
+    if (containerX >= parent.position().left - pos_x) {
+        r_left = containerX
+    } else if ( Math.round((containerX + width) - target.width()) <= (parent.position().left - pos_x)) {
+        r_left = (containerX + width) - target.width()
+    } else {
+        r_left = parent.position().left - pos_x
+    }
 
-    return obj.css({ 'left': r_left, 'top': r_top });
+    if (containerY >= parent.position().top - pos_y) {
+        r_top = containerY
+    } else if ( Math.round((containerY+height) - target.height()) <= (parent.position().top - pos_y) ) {
+        r_top = (containerY + height) - target.height();
+    } else {
+        r_top = parent.position().top - pos_y
+    }
+
+    return parent.css({ 'left': r_left, 'top': r_top });
 }
 
 // JQuery Object 를 넘긴다.
@@ -106,6 +109,7 @@ var createStickerController = function(src) {
     imgTag.setAttribute('class', 'image_stickers')
     imgTag.setAttribute('id', 'image_sticker_'+stickerIndex)
     imgTag.setAttribute('onmousedown', 'handleSticker.drag(event)')
+    imgTag.setAttribute('crossOrigin', 'Anonymous')
     
     // Sticker Resize Handle
     sizeDiv.setAttribute('onmousedown', 'handleSticker.resize(event)')
@@ -121,4 +125,5 @@ var createStickerController = function(src) {
     container.appendChild(wrapper)
     wrapper.appendChild(imgTag)
     wrapper.appendChild(sizeDiv)
+    return
 }

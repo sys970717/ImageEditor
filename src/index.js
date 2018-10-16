@@ -10,12 +10,17 @@ var state = {
     image_width: 0,
     image_height: 0,
     event_state : false,
+    evnet_name : '',
     extract: '',
     stickerIndex: 0,
     sticker: [],
     scale_count : 1,
     view_original : 1.0,
-    edit_view : 1.0,
+    scale : {
+        edit : 1.0,
+        Multiplier : 0.92
+    },
+    ctx_original : ''
 }
 
 /*
@@ -61,7 +66,7 @@ var history_arr = {
     }
 }
 
-var canvas, ctx
+var canvas, ctx, tmp_image
 
 /*
  * 페이지 인입시 초기화하는 메서드
@@ -73,7 +78,8 @@ var init = function () {
     canvas = document.getElementById('editor'), ctx = canvas.getContext('2d')
     canvas.width = props.width, canvas.height = props.width
     document.getElementById('fileUpload').addEventListener('change', handleUpload, false)
-    ctx.globalCompositeOperation = "copy"
+    tmp_image = document.getElementById('tmp_image')
+    // ctx.globalCompositeOperation = "copy"
 }
 
 /*
@@ -114,9 +120,13 @@ var handleUpload = function (e) {
                 state.image_width = editWidth, state.image_height = editHeight
 
                 ctx.drawImage(image, 0, 0, editWidth, editHeight)
-            }
 
+                tmp_image.width = state.image_width
+                tmp_image.height = state.image_height
+                tmp_image.src = this.src
+            }
             history_arr.setArr(image)
+            state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
         }
     } else {
         return
@@ -203,8 +213,9 @@ var drawCrop = function () {
     var cropBox = $("#overlay")
     var wrapBox = $('#crop_wrapper').offset()
 
+    ctx.save()
     var image = new Image()
-    image.src = canvas.toDataURL()
+    image.src = document.getElementById('editor').toDataURL()
 
     image.onload = function () {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -215,6 +226,7 @@ var drawCrop = function () {
         ctx.drawImage(image, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight)
     }
 
+    state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
     history_arr.setArr(image)
     state.event_state = false
     $("#crop_wrapper").addClass('off')
@@ -239,12 +251,13 @@ var handleRotate = function (direction) {
     ctx.save()
     ctx.translate(ox, oy)
     ctx.rotate((Math.PI / 180) * state.degrees)
-    
+    ctx.globalCompositeOperation = "copy"
 
     // returnData = {width : '', height: ''}
     ctx.translate(-ox, -oy)
     ctx.drawImage(ctx.canvas, 0, 0, props.width, props.height)
     ctx.restore()
+    state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
 }
 
 // Sticker Event
@@ -252,6 +265,10 @@ var handleSticker = {
     create: function (ele) {
         if(state.event_state === false) {
             state.event_state = true
+            state.evnet_name = 'sticker'
+            var sticker = ele.childNodes[0].src;
+            createStickerController(sticker)
+        } else if(state.evnet_name === 'sticker') {
             var sticker = ele.childNodes[0].src;
             createStickerController(sticker)
         } else {
@@ -297,6 +314,7 @@ var handleSticker = {
     render : function() {
         var stickerController, stickerObj, image = new Image()
         var s_left = 0, s_top = 0, sticker_width = 0, sticker_height = 0
+        ctx.save()
         for(var i=1; i<=state.stickerIndex; i++) {
             stickerController = document.getElementById('sticker_wrap_'+i)
             stickerObj = document.getElementById('image_sticker_'+i)
@@ -309,6 +327,7 @@ var handleSticker = {
             sticker_width = stickerObj.width, sticker_height = stickerObj.height
             
             ctx.drawImage(image, s_left, s_top, sticker_width, sticker_height)
+            ctx.restore()
 
             $(stickerObj).remove()
             $(stickerController).remove()
@@ -316,7 +335,9 @@ var handleSticker = {
         state.sticker = []
         state.stickerIndex = 0
         state.event_state = false
-        history_arr.setArr(canvas.toDataURL())
+        state.evnet_name = ''
+        state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
+        tmp_image.src = canvas.toDataURL()
     }
 }
 
@@ -340,10 +361,12 @@ var handleImageFlip = function (direction) {
         ctx.scale(1, -1)
     }
 
+    ctx.globalCompositeOperation = "copy"
     // returnData = {width : '', height: ''}
     ctx.translate(-ox, -oy)
     ctx.drawImage(ctx.canvas, 0, 0, props.width, props.width)
     ctx.restore()
+    state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
     return
 }
 
@@ -353,7 +376,7 @@ var handleZoom = {
         var max = props.MAX_SCALE
         if(max > state.scale_count) {
             state.scale_count += 1
-            state.edit_view += 0.02
+            state.scale.edit /= state.scale.Multiplier
             this._render()
         }
     },
@@ -361,7 +384,7 @@ var handleZoom = {
         var min = props.MIN_SCALE
         if(min < state.scale_count) {
             state.scale_count -= 1
-            state.edit_view -= 0.02
+            state.scale.edit *= state.scale.Multiplier
             this._render()
         }
     },
@@ -370,8 +393,8 @@ var handleZoom = {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.translate(ox, oy);
-        ctx.scale(state.edit_view, state.edit_view)
-        ctx.translate(-ox, -oy);
+        ctx.scale(state.scale.edit, state.scale.edit)
+        // ctx.translate(-ox, -oy);
 
         ctx.clearRect(0, 0, props.width, props.height);
 
@@ -389,5 +412,9 @@ var handleZoom = {
         ctx.drawImage(image, 0, 0, data.width, data.height)
         return
     }
+}
+
+var handleFilter = function(data) {
+    Filter.factory(data)
 }
 
