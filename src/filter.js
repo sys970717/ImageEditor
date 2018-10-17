@@ -78,6 +78,9 @@ Filters.createImageData = function (w, h) {
 };
 
 Filters.convolute = function (pixels, weights, opaque) {
+    var opaque = [  0, -1,  0,
+        -1,  5, -1,
+         0, -1,  0 ]
     var side = Math.round(Math.sqrt(weights.length));
     var halfSide = Math.floor(side / 2);
 

@@ -9,18 +9,19 @@ var state = {
     origin: '',
     image_width: 0,
     image_height: 0,
-    event_state : false,
-    evnet_name : '',
+    event_state: false,
+    evnet_name: '',
     extract: '',
     stickerIndex: 0,
     sticker: [],
-    scale_count : 1,
-    view_original : 1.0,
-    scale : {
-        edit : 1.0,
-        Multiplier : 0.92
+    scale_count: 1,
+    view_original: 1.0,
+    scale: {
+        edit: 1.0,
+        Multiplier: 0.92
     },
-    ctx_original : ''
+    ctx_original: '',
+    first : true
 }
 
 /*
@@ -34,8 +35,8 @@ var props = {
     ACCEPTED_FILE_TYPES: 'image/jpeg, image/jpg, image/png',
     width: 500,
     height: 500,
-    MAX_SCALE : 5,
-    MIN_SCALE : 0
+    MAX_SCALE: 5,
+    MIN_SCALE: 0
 }
 
 /*
@@ -55,12 +56,12 @@ var mouse = {
 
 // history_arr
 var history_arr = {
-    _arr : [],
-    _tmp_arr : [],
-    getArr : function() {
-        return this._tmp_arr[this._arr.length-1]
+    _arr: [],
+    _tmp_arr: [],
+    getArr: function () {
+        return this._tmp_arr[this._arr.length - 1]
     },
-    setArr : function(data) {
+    setArr: function (data) {
         this._arr.push(data)
         this._tmp_arr = this._arr
     }
@@ -91,6 +92,7 @@ var init = function () {
  */
 var handleUpload = function (e) {
     var files = e.target.files
+    var editWidth, editHeight
     if (varifyImage(files)) {
         var file = files[0]
 
@@ -107,7 +109,6 @@ var handleUpload = function (e) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height)
 
                 var rw = image.width / props.width, rh = image.height / props.width
-                var editWidth, editHeight
 
                 if (rw > rh) {
                     editWidth = props.width
@@ -117,20 +118,26 @@ var handleUpload = function (e) {
                     editHeight = props.width
                 }
 
-                state.image_width = editWidth, state.image_height = editHeight
-
                 ctx.drawImage(image, 0, 0, editWidth, editHeight)
 
-                tmp_image.width = state.image_width
-                tmp_image.height = state.image_height
+                tmp_image.width = editWidth
+                tmp_image.height = editHeight
                 tmp_image.src = this.src
+                
+                setState({
+                    'image_width': editWidth,
+                    'image_height': editHeight,
+                })
             }
             history_arr.setArr(image)
-            state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
         }
+
     } else {
         return
     }
+    
+
+    return
 }
 
 /*
@@ -140,7 +147,7 @@ var handleUpload = function (e) {
  * @Type Method
  */
 var handleCropButton = function () {
-    if(state.event_state) {
+    if (state.event_state) {
         alert('다른 이벤트를 사용중입니다.')
         return
     }
@@ -150,7 +157,7 @@ var handleCropButton = function () {
         'style', 'left:' + canvas.offsetLeft + 'px;' +
         'top:' + canvas.offsetTop + 'px;'
     )
-    state.event_state = true
+    setState({ 'event_state': true })
 }
 
 /*
@@ -219,18 +226,20 @@ var drawCrop = function () {
 
     image.onload = function () {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        var sx = wrapBox.left - canvas.offsetTop < 0 ? 0 :wrapBox.left - canvas.offsetTop , sy = wrapBox.top - canvas.offsetTop < 0 ? 0 : wrapBox.top - canvas.offsetTop
+
+        var sx = wrapBox.left - canvas.offsetTop < 0 ? 0 : wrapBox.left - canvas.offsetTop, sy = wrapBox.top - canvas.offsetTop < 0 ? 0 : wrapBox.top - canvas.offsetTop
         var sWidth = cropBox.width(), sHeight = cropBox.height()
 
         ctx.drawImage(image, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight)
     }
 
-    state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
+    setState({
+        'ctx_original': ctx.getImageData(0, 0, state.image_width, state.image_height),
+        'event_state': false
+    })
     history_arr.setArr(image)
-    state.event_state = false
     $("#crop_wrapper").addClass('off')
-    
+
 }
 /*
  * Image Rotate
@@ -257,25 +266,31 @@ var handleRotate = function (direction) {
     ctx.translate(-ox, -oy)
     ctx.drawImage(ctx.canvas, 0, 0, props.width, props.height)
     ctx.restore()
-    state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
+    setState({
+        'ctx_original': ctx.getImageData(0, 0, state.image_width, state.image_height)
+    })
 }
 
 // Sticker Event
 var handleSticker = {
     create: function (ele) {
-        if(state.event_state === false) {
+        if (state.event_state === false) {
             state.event_state = true
             state.evnet_name = 'sticker'
+            setState({
+                'event_state': true,
+                'event_name': 'sticker'
+            })
             var sticker = ele.childNodes[0].src;
             createStickerController(sticker)
-        } else if(state.evnet_name === 'sticker') {
+        } else if (state.evnet_name === 'sticker') {
             var sticker = ele.childNodes[0].src;
             createStickerController(sticker)
         } else {
             alert('이벤트가 실행되고있습니다. 현재 상태를 저장 후 사용하시기 바랍니다.')
             return;
         }
-        
+
     },
     resize: function (event) {
         mouse.sizeX = event.pageX;
@@ -311,32 +326,34 @@ var handleSticker = {
             return false
         })
     },
-    render : function() {
+    render: function () {
         var stickerController, stickerObj, image = new Image()
         var s_left = 0, s_top = 0, sticker_width = 0, sticker_height = 0
         ctx.save()
-        for(var i=1; i<=state.stickerIndex; i++) {
-            stickerController = document.getElementById('sticker_wrap_'+i)
-            stickerObj = document.getElementById('image_sticker_'+i)
-            
+        for (var i = 1; i <= state.stickerIndex; i++) {
+            stickerController = document.getElementById('sticker_wrap_' + i)
+            stickerObj = document.getElementById('image_sticker_' + i)
+
             image.src = stickerObj.src
-            
+
             s_left = Math.round(stickerController.offsetLeft - canvas.offsetLeft),
-            s_top = Math.round(stickerController.offsetTop - canvas.offsetTop)
+                s_top = Math.round(stickerController.offsetTop - canvas.offsetTop)
 
             sticker_width = stickerObj.width, sticker_height = stickerObj.height
-            
+
             ctx.drawImage(image, s_left, s_top, sticker_width, sticker_height)
             ctx.restore()
 
             $(stickerObj).remove()
             $(stickerController).remove()
         }
-        state.sticker = []
-        state.stickerIndex = 0
-        state.event_state = false
-        state.evnet_name = ''
-        state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
+        setState({
+            'sticker': [],
+            'stickerIndex': 0,
+            'evnet_state': false,
+            'event_name': '',
+            'ctx_original': ctx.getImageData(0, 0, state.image_width, state.image_height)
+        })
         tmp_image.src = canvas.toDataURL()
     }
 }
@@ -366,29 +383,31 @@ var handleImageFlip = function (direction) {
     ctx.translate(-ox, -oy)
     ctx.drawImage(ctx.canvas, 0, 0, props.width, props.width)
     ctx.restore()
-    state.ctx_original = ctx.getImageData(0, 0, state.image_width, state.image_height)
+    setState({
+        'ctx_original': ctx.getImageData(0, 0, state.image_width, state.image_height)
+    })
     return
 }
 
 var handleZoom = {
-    in : function() {
+    in: function () {
         var ox = (props.width / 2), oy = (props.height / 2)
         var max = props.MAX_SCALE
-        if(max > state.scale_count) {
+        if (max > state.scale_count) {
             state.scale_count += 1
             state.scale.edit /= state.scale.Multiplier
             this._render()
         }
     },
-    out : function() {
+    out: function () {
         var min = props.MIN_SCALE
-        if(min < state.scale_count) {
+        if (min < state.scale_count) {
             state.scale_count -= 1
             state.scale.edit *= state.scale.Multiplier
             this._render()
         }
     },
-    _render : function() {    
+    _render: function () {
         var ox = (props.width / 2), oy = (props.height / 2)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -414,7 +433,13 @@ var handleZoom = {
     }
 }
 
-var handleFilter = function(data) {
+var handleFilter = function (data) {
+    if(state.first) {
+        setState({
+            'ctx_original' : ctx.getImageData(0, 0, state.image_width, state.image_height),
+            'first' : false
+        })
+    }
     Filter.factory(data)
 }
 

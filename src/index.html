@@ -40,6 +40,9 @@
         <legend>Filter</legend>
         <button onclick="handleFilter(this.dataset.filter)" data-filter="restore">원래대로</button>
         <button onclick="handleFilter(this.dataset.filter)" data-filter="grayscale">GrayScale</button>
+        <button onclick="handleFilter(this.dataset.filter)" data-filter="brightness">밝게</button>
+        <button onclick="handleFilter(this.dataset.filter)" data-filter="threshold">흑백</button>
+        
     </fieldset>
     <div id="wrapper">
         <canvas width="500" height="500" id="editor"></canvas>

@@ -1,3 +1,17 @@
+/*
+ * Object Size를 재기 위해 선언한 함수
+ * @since 2018. 10. 17
+ * @author sys970717
+ * @Param {Object} obj
+ */
+Object.size = function(obj) {
+    var size = 0, key
+    for(key in obj) {
+        if(obj.hasOwnProperty(key)) size += 1
+    }
+    return size
+}
+
 var varifyImage = function (files) {
     if (files && files.length > 0) {
         var currentFile = files[0]
@@ -32,6 +46,17 @@ var getScaleSize = function (width, height) {
     return returnData
 }
 
+
+var setState = function(obj) {
+    var key = ''
+    for(key in state) {
+        if(state.hasOwnProperty(key) && obj.hasOwnProperty(key)) {                    
+            state[key] = obj[key]
+        }
+    }
+    return
+}
+
 // JQuery Object 를 넘긴다.
 var _checkedMovePosition = function (target, parent, e) {
     var containerY = canvas.offsetTop, containerX = canvas.offsetLeft
@@ -41,9 +66,6 @@ var _checkedMovePosition = function (target, parent, e) {
 
     mouse.mouseX = e.pageX, mouse.mouseY = e.pageY
     var r_top = 0, r_left = 0
-
-    console.log('Y : '+Math.round(((parent.position().top - pos_y)) + target.height()))
-    console.log('Y : '+Math.round ((containerY+height) - target.height()))
 
     if (containerX >= parent.position().left - pos_x) {
         r_left = containerX
@@ -71,8 +93,6 @@ var _checkedSizePosition = function (target, result, e) {
 
     moveX = parseInt(result.css('width'))-(mouse.sizeX - e.pageX)
     moveY = parseInt(result.css('height'))-(mouse.sizeY - e.pageY)
-
-    console.log(moveX, moveY)
 
     mouse.sizeX = e.pageX
     mouse.sizeY = e.pageY
@@ -114,8 +134,6 @@ var createStickerController = function(src) {
     // Sticker Resize Handle
     sizeDiv.setAttribute('onmousedown', 'handleSticker.resize(event)')
     sizeDiv.setAttribute('class', 'resize-handle-se')
-
-    console.log(sizeDiv)
 
     // Sticker Move
     wrapper.setAttribute('class', 'sticker_image')
